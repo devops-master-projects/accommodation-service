@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  accommodation-postgres:
+    image: postgres:16
+    container_name: accommodation-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: accommodation
+    ports:
+      - "5433:5432"
+    volumes:
+      - accommodation-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d accommodation"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  accommodation-pgadmin:
+    image: dpage/pgadmin4
+    container_name: accommodation-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8083:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      accommodation-postgres:
+        condition: service_healthy
+
+volumes:
+  accommodation-data:
+  pgadmin-data:
