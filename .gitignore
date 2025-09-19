@@ -27,3 +27,13 @@ replay_pid*
 .idea/
 *.iml
 out/
+
+# Gradle build folder
+/build/
+.gradle/
+# Ignoriši sve u gradle folderu
+Backend/Accommodations/gradle/*
+!Backend/Accommodations/gradle/wrapper/gradle-wrapper.jar
+!Backend/Accommodations/gradle/wrapper/gradle-wrapper.properties
+
+
