@@ -19,21 +19,6 @@ services:
       timeout: 3s
       retries: 30
 
-  accommodation-pgadmin:
-    image: dpage/pgadmin4
-    container_name: accommodation-pgadmin
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "8083:80"
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
-    depends_on:
-      accommodation-postgres:
-        condition: service_healthy
-
 volumes:
   accommodation-data:
-  pgadmin-data:
+

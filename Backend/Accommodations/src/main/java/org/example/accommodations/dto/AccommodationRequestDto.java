@@ -2,9 +2,11 @@ package org.example.accommodations.dto;
 
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class AccommodationRequestDto {
-    private Long hostId;
+    private UUID hostId;
     private String name;
     private String location;
     private Integer minGuests;
