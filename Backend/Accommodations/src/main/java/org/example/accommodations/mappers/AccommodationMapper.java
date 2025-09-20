@@ -1,11 +1,14 @@
 package org.example.accommodations.mappers;
 
 import org.example.accommodations.dto.AccommodationResponseDto;
+import org.example.accommodations.dto.AmenityResponseDto;
 import org.example.accommodations.dto.LocationDto;
 import org.example.accommodations.model.Accommodation;
 import org.example.accommodations.model.Location;
 import org.example.accommodations.model.Photo;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class AccommodationMapper {
@@ -21,6 +24,17 @@ public class AccommodationMapper {
                 .urlPhotos(accommodation.getPhotos() != null
                         ? accommodation.getPhotos().stream().map(Photo::getUrl).toList()
                         : null)
+                .autoConfirm(accommodation.getAutoConfirm())
+                .pricingMode(accommodation.getPricingMode())
+                .amenities(accommodation.getAmenities() != null
+                        ? accommodation.getAmenities().stream()
+                        .map(a -> new AmenityResponseDto(
+                                a.getId(),
+                                a.getName(),
+                                a.getDescription()
+                        ))
+                        .toList()
+                        : List.of())
                 .build();
     }
 

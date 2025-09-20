@@ -19,4 +19,7 @@ public class AccommodationResponseDto {
     private String description;
     private List<String> urlPhotos;
     private LocationDto location;
+    private Boolean autoConfirm;
+    private String pricingMode;
+    private List<AmenityResponseDto> amenities;
 }

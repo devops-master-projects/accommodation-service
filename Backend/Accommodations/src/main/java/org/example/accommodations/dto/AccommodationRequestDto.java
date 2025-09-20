@@ -16,4 +16,5 @@ public class AccommodationRequestDto {
     private Boolean autoConfirm;
     private String pricingMode;
     private List<String> photos;
+    private List<UUID> amenities;
 }

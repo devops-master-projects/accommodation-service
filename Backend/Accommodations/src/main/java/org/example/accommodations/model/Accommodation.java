@@ -3,8 +3,7 @@ package org.example.accommodations.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "accommodations")
@@ -34,6 +33,7 @@ public class Accommodation {
     @JoinColumn(name = "location_id", nullable = false)
     private Location location;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     private Boolean autoConfirm;
@@ -42,7 +42,7 @@ public class Accommodation {
 
     // Relations
     @OneToMany(mappedBy = "accommodation", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Photo> photos;
+    private Set<Photo> photos = new HashSet<>();
 
     @OneToMany(mappedBy = "accommodation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Availability> availability;
@@ -53,7 +53,8 @@ public class Accommodation {
             joinColumns = @JoinColumn(name = "accommodation_id"),
             inverseJoinColumns = @JoinColumn(name = "amenity_id")
     )
-    private List<Amenity> amenities;
+    private Set<Amenity> amenities = new HashSet<>();
+
 
     @PrePersist
     public void generateId() {
