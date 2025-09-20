@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface AccommodationRepository extends JpaRepository<Accommodation, Long> {
-    List<Accommodation> findByLocation(String location);
+
 }

@@ -4,6 +4,7 @@ import org.example.accommodations.dto.AccommodationRequestDto;
 import org.example.accommodations.dto.AccommodationResponseDto;
 import org.example.accommodations.model.Accommodation;
 import org.example.accommodations.model.Location;
+import org.example.accommodations.model.Photo;
 import org.example.accommodations.repository.AccommodationRepository;
 import org.example.accommodations.mappers.AccommodationMapper;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,12 @@ public class AccommodationService {
                 .postalCode(request.getLocation().getPostalCode())
                 .build();
 
+        List<Photo> photos = request.getPhotos() != null
+                ? request.getPhotos().stream()
+                .map(url -> Photo.builder().url(url).build())
+                .toList()
+                : List.of();
+
         Accommodation accommodation = Accommodation.builder()
                 .hostId(request.getHostId())
                 .name(request.getName())
@@ -45,7 +52,10 @@ public class AccommodationService {
                 .description(request.getDescription())
                 .autoConfirm(request.getAutoConfirm())
                 .pricingMode(request.getPricingMode())
+                .photos(photos)
                 .build();
+
+        photos.forEach(p -> p.setAccommodation(accommodation));
         Accommodation saved = accommodationRepository.save(accommodation);
         return accommodationMapper.toDto(saved);
     }
