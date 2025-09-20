@@ -1,15 +1,22 @@
 package org.example.accommodations.dto;
 
-import lombok.Data;
+import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class AccommodationResponseDto {
     private UUID id;
     private String name;
-    private String location;
     private Integer minGuests;
     private Integer maxGuests;
     private String description;
+    private List<String> urlPhotos;
+    private LocationDto location;
 }

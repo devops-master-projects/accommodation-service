@@ -26,13 +26,14 @@ public class Accommodation {
     private String name;
 
     @Column(nullable = false)
-    private String location;
-
-    @Column(nullable = false)
     private Integer minGuests;
 
     @Column(nullable = false)
     private Integer maxGuests;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "location_id", nullable = false)
+    private Location location;
 
     private String description;
 

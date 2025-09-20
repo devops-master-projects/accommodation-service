@@ -20,9 +20,10 @@ public class AccommodationController {
     }
 
     @GetMapping
-    public List<Accommodation> getAll() {
+    public List<AccommodationResponseDto> getAll() {
         return accommodationService.getAll();
     }
+
 
     @PostMapping
     public AccommodationResponseDto create(@RequestBody AccommodationRequestDto request) {

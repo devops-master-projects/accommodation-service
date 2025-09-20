@@ -8,7 +8,7 @@ import java.util.UUID;
 public class AccommodationRequestDto {
     private UUID hostId;
     private String name;
-    private String location;
+    private LocationDto location;
     private Integer minGuests;
     private Integer maxGuests;
     private String description;
