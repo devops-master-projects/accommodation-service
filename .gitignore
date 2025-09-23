@@ -31,8 +31,8 @@ out/
 # Gradle build folder
 /build/
 .gradle/
+
 Backend/Accommodations/gradle/*
 !Backend/Accommodations/gradle/wrapper/
 !Backend/Accommodations/gradle/wrapper/gradle-wrapper.jar
 !Backend/Accommodations/gradle/wrapper/gradle-wrapper.properties
-
