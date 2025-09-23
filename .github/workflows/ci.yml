@@ -11,15 +11,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    defaults:
-      run:
-        working-directory: Backend/Accommodation
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: List files in repo
+        run: ls -R
 
       - name: Set up JDK 17 (Temurin)
         uses: actions/setup-java@v4
