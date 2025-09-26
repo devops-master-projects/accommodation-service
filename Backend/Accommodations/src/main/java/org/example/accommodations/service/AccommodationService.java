@@ -1,9 +1,13 @@
 package org.example.accommodations.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.example.accommodations.dto.AccommodationEvent;
 import org.example.accommodations.dto.AccommodationRequestDto;
 import org.example.accommodations.dto.AccommodationResponseDto;
+import org.example.accommodations.dto.LocationDto;
 import org.example.accommodations.model.Accommodation;
 import org.example.accommodations.model.Amenity;
 import org.example.accommodations.model.Location;
@@ -11,6 +15,7 @@ import org.example.accommodations.model.Photo;
 import org.example.accommodations.repository.AccommodationRepository;
 import org.example.accommodations.mappers.AccommodationMapper;
 import org.example.accommodations.repository.AmenityRepository;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -23,12 +28,18 @@ public class AccommodationService {
     private final AccommodationRepository accommodationRepository;
     private final AccommodationMapper accommodationMapper;
     private final AmenityRepository amenityRepository;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
+
 
     public AccommodationService(AccommodationRepository accommodationRepository, AccommodationMapper accommodationMapper,
-                                AmenityRepository amenityRepository) {
+                                AmenityRepository amenityRepository, KafkaTemplate<String, String> kafkaTemplate,
+                                ObjectMapper objectMapper) {
         this.accommodationRepository = accommodationRepository;
         this.accommodationMapper = accommodationMapper;
         this.amenityRepository = amenityRepository;
+        this.kafkaTemplate = kafkaTemplate;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional
@@ -132,11 +143,45 @@ public class AccommodationService {
                 .amenities(amenities)
                 .build();
 
-        // Postavi bi-directional vezu za photos
         photos.forEach(p -> p.setAccommodation(accommodation));
 
         Accommodation saved = accommodationRepository.save(accommodation);
+        sendAccommodationCreatedEvent(saved);
+
         return accommodationMapper.toDto(saved);
+    }
+
+    private void sendAccommodationCreatedEvent(Accommodation saved) {
+        AccommodationEvent event = new AccommodationEvent(
+                "AccommodationCreated",
+                saved.getId().toString(),
+                saved.getHostId().toString(),
+                saved.getName(),
+                saved.getDescription(),
+                saved.getMinGuests(),
+                saved.getMaxGuests(),
+                saved.getAutoConfirm(),
+                saved.getPricingMode(),
+                new LocationDto(
+                        saved.getLocation().getCity(),
+                        saved.getLocation().getCountry(),
+                        saved.getLocation().getAddress(),
+                        saved.getLocation().getPostalCode()
+                ),
+                saved.getAmenities().stream()
+                        .map(Amenity::getName)
+                        .collect(Collectors.toList()),
+                saved.getPhotos().stream()
+                        .map(Photo::getUrl)
+                        .collect(Collectors.toList())
+        );
+
+        try {
+            String json = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send("accommodation-events", saved.getId().toString(), json);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize AccommodationEvent", e);
+        }
     }
 
 }
