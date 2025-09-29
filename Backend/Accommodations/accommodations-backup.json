@@ -1,0 +1,159 @@
+[ {
+  "id" : "f415bfe2-42b7-4971-abd8-c5da7208302b",
+  "name" : "Mountain Cabin of Tara",
+  "minGuests" : 2,
+  "maxGuests" : 6,
+  "description" : "A rustic wooden cabin located in the heart of Tara National Park, surrounded by pine forests. The house features a spacious living room with a fireplace, a fully equipped kitchen, and a large terrace with panoramic forest views. Perfect for families or groups seeking peace, hiking, and fresh mountain air.",
+  "urlPhotos" : [ "https://res.cloudinary.com/dok1mjki6/image/upload/v1758730451/o5jomm2qpmr4oj1ntpr0.jpg", "https://res.cloudinary.com/dok1mjki6/image/upload/v1758730451/ryqcpi8w7syyukhgqhm8.jpg" ],
+  "location" : {
+    "country" : "Serbia",
+    "city" : "Mitrovac",
+    "address" : "Tara National Park bb",
+    "postalCode" : "31250"
+  },
+  "autoConfirm" : false,
+  "pricingMode" : "PER_NIGHT",
+  "amenities" : [ ]
+}, {
+  "id" : "1a53acd3-bf67-4f9a-9c4f-e0e1a5276689",
+  "name" : "Ohrid Lakeside Hotel",
+  "minGuests" : 1,
+  "maxGuests" : 5,
+  "description" : "A comfortable lakeside hotel situated right on the promenade of Lake Ohrid. The hotel offers spacious rooms with balconies overlooking the water, a restaurant with local and international cuisine, and a wellness center with sauna and jacuzzi. Perfect choice for families, groups, and business travelers seeking comfort near the city center.",
+  "urlPhotos" : [ "https://res.cloudinary.com/dok1mjki6/image/upload/v1758731189/f8ekjlmkvvfh8sgiegee.jpg" ],
+  "location" : {
+    "country" : "North Macedonia",
+    "city" : "Ohrid",
+    "address" : "Lakeside Promenade 21",
+    "postalCode" : "6000"
+  },
+  "autoConfirm" : false,
+  "pricingMode" : "PER_PERSON",
+  "amenities" : [ {
+    "id" : "793d175f-11c4-4bbf-b296-62090f5b13ab",
+    "name" : "Parking",
+    "description" : "Parking"
+  }, {
+    "id" : "0deb0841-c75e-4783-99ee-aa340fb9cafc",
+    "name" : "Kitchen",
+    "description" : "Kitchen"
+  }, {
+    "id" : "265532dc-1a76-40a7-9254-aa4494eeba32",
+    "name" : "WiFI",
+    "description" : "WiFI"
+  } ]
+}, {
+  "id" : "1194ca87-f826-4cf8-a288-ce58e5b79f9f",
+  "name" : "Vrnjačka Banja Spa Apartment",
+  "minGuests" : 1,
+  "maxGuests" : 6,
+  "description" : "A modern apartment located just a few minutes from the famous mineral springs of Vrnjačka Banja. Guests can enjoy a bright living space, private balcony, and access to a wellness center with spa treatments and an indoor swimming pool. Ideal for couples and travelers seeking relaxation and health benefits of thermal waters.",
+  "urlPhotos" : [ "https://res.cloudinary.com/dok1mjki6/image/upload/v1758730712/wh23tcogpt3rxnqfkymb.jpg", "https://res.cloudinary.com/dok1mjki6/image/upload/v1758730712/tgrplwr0i0p2giizb3hk.jpg" ],
+  "location" : {
+    "country" : "Serbia",
+    "city" : "Vrnjačka Banja",
+    "address" : "Žička Street 12",
+    "postalCode" : "36210"
+  },
+  "autoConfirm" : false,
+  "pricingMode" : "PER_NIGHT",
+  "amenities" : [ ]
+}, {
+  "id" : "fd38fe04-8095-4dc0-b0e1-d96983eef4eb",
+  "name" : "Budva Hillside Villa",
+  "minGuests" : 4,
+  "maxGuests" : 12,
+  "description" : "A luxurious hillside villa located above Budva with breathtaking panoramic views of the Adriatic Sea. The villa features an infinity pool, spacious garden, private parking, and modern interior design. Perfect for larger groups or families looking for privacy, relaxation, and quick access to the city center and beaches.",
+  "urlPhotos" : [ "https://res.cloudinary.com/dok1mjki6/image/upload/v1758731347/it0nma9orjhdisrwfnao.jpg" ],
+  "location" : {
+    "country" : "Montenegro",
+    "city" : "Budva",
+    "address" : "Podmaine Hills 5",
+    "postalCode" : "85310"
+  },
+  "autoConfirm" : true,
+  "pricingMode" : "PER_PERSON",
+  "amenities" : [ {
+    "id" : "793d175f-11c4-4bbf-b296-62090f5b13ab",
+    "name" : "Parking",
+    "description" : "Parking"
+  }, {
+    "id" : "0deb0841-c75e-4783-99ee-aa340fb9cafc",
+    "name" : "Kitchen",
+    "description" : "Kitchen"
+  }, {
+    "id" : "265532dc-1a76-40a7-9254-aa4494eeba32",
+    "name" : "WiFI",
+    "description" : "WiFI"
+  } ]
+}, {
+  "id" : "fd6689f4-f221-48d6-b43f-eb9600dc45e1",
+  "name" : "Budva Beachfront Apartment",
+  "minGuests" : 1,
+  "maxGuests" : 6,
+  "description" : "Modern apartment located directly on the Adriatic coast in Budva. The apartment offers a spacious balcony with sea views, open living and dining area, and access to a private beach. Ideal for summer holidays, water sports, and nightlife enthusiasts.",
+
+
+  "urlPhotos" : [ "https://res.cloudinary.com/dok1mjki6/image/upload/v1758730883/sttsj8pmknpo65wvnrxz.jpg" ],
+  "location" : {
+    "country" : "Montenegro",
+    "city" : "Budva",
+    "address" : "Slovenska Obala 45",
+    "postalCode" : "85310"
+  },
+  "autoConfirm" : true,
+  "pricingMode" : "PER_PERSON",
+  "amenities" : [ {
+    "id" : "793d175f-11c4-4bbf-b296-62090f5b13ab",
+    "name" : "Parking",
+    "description" : "Parking"
+  }, {
+    "id" : "0deb0841-c75e-4783-99ee-aa340fb9cafc",
+    "name" : "Kitchen",
+    "description" : "Kitchen"
+  } ]
+}, {
+  "id" : "45eb1d47-c507-473b-aabd-1bb40f0c93ec",
+  "name" : "Ohrid Old Town Apartment",
+  "minGuests" : 1,
+  "maxGuests" : 1,
+  "description" : "A cozy apartment located in the historic old town of Ohrid, just a short walk from the famous Church of St. John at Kaneo. The apartment features a modern interior, a small balcony overlooking the cobblestone streets, and is ideal for couples or solo travelers who want to explore the cultural and historical heritage of the city.",
+  "urlPhotos" : [ "https://res.cloudinary.com/dok1mjki6/image/upload/v1758731098/ptyp8hdcufxwjsakhjwn.jpg" ],
+  "location" : {
+    "country" : "North Macedonia",
+    "city" : "Ohrid",
+    "address" : "Old Town, Kuzman Kapidan Street 8",
+    "postalCode" : "6000"
+  },
+  "autoConfirm" : false,
+  "pricingMode" : "PER_NIGHT",
+  "amenities" : [ {
+    "id" : "793d175f-11c4-4bbf-b296-62090f5b13ab",
+    "name" : "Parking",
+    "description" : "Parking"
+  } ]
+}, {
+  "id" : "44d2d2a6-288a-414e-8080-a39350ada088",
+  "name" : "Ohrid Lake House",
+  "minGuests" : 1,
+  "maxGuests" : 1,
+  "description" : "Charming wooden house right on the shore of Lake Ohrid. Guests can enjoy private boat access, fishing, and breathtaking sunsets over the lake. The house includes two bedrooms, a cozy living area, and a terrace with a barbecue. Great for family getaways.",
+  "urlPhotos" : [ "https://res.cloudinary.com/dok1mjki6/image/upload/v1758730965/zumcmurozsyqmxoy82ua.jpg" ],
+  "location" : {
+    "country" : "North Macedonia",
+    "city" : "Ohrid",
+    "address" : "Kaneo bb",
+    "postalCode" : "6000"
+  },
+  "autoConfirm" : false,
+  "pricingMode" : "FIXED",
+  "amenities" : [ {
+    "id" : "0deb0841-c75e-4783-99ee-aa340fb9cafc",
+    "name" : "Kitchen",
+    "description" : "Kitchen"
+  }, {
+    "id" : "265532dc-1a76-40a7-9254-aa4494eeba32",
+    "name" : "WiFI",
+    "description" : "WiFI"
+  } ]
+} ]

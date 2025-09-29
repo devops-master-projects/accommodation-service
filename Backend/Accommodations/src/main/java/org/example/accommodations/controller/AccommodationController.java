@@ -3,11 +3,13 @@ package org.example.accommodations.controller;
 
 import org.example.accommodations.dto.AccommodationRequestDto;
 import org.example.accommodations.dto.AccommodationResponseDto;
+import org.example.accommodations.dto.AutoConfirm;
 import org.example.accommodations.model.Accommodation;
 import org.example.accommodations.service.AccommodationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,7 +24,7 @@ public class AccommodationController {
     }
 
     @GetMapping
-    public List<AccommodationResponseDto> getAll() {
+    public List<AccommodationResponseDto> getAll()  {
         return accommodationService.getAll();
     }
 
@@ -44,4 +46,20 @@ public class AccommodationController {
     ) {
         return ResponseEntity.ok(accommodationService.update(id, request));
     }
+
+    @PatchMapping("/{id}/auto-confirm")
+    public ResponseEntity<AccommodationResponseDto> updateAutoConfirm(
+            @PathVariable UUID id,
+            @RequestBody AutoConfirm request) {
+
+        AccommodationResponseDto updated = accommodationService.updateAutoConfirm(id, request.isAutoConfirm());
+        return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("/{id}/auto-confirm")
+    public ResponseEntity<AutoConfirm> getAutoConfirm(@PathVariable UUID id) {
+        boolean autoConfirm = accommodationService.getAutoConfirm(id);
+        return ResponseEntity.ok(new AutoConfirm(autoConfirm));
+    }
+
 }

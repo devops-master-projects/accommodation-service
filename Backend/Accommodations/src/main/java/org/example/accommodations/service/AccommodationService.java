@@ -18,6 +18,8 @@ import org.example.accommodations.repository.AmenityRepository;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 import java.util.stream.Collectors;
@@ -49,12 +51,33 @@ public class AccommodationService {
         return accommodationMapper.toDto(accommodation);
     }
 
-    public List<AccommodationResponseDto> getAll() {
+    public List<AccommodationResponseDto> getAll()  {
         return accommodationRepository.findAllWithDetails()
                 .stream()
                 .map(accommodationMapper::toDto)
                 .toList();
     }
+
+    @Transactional
+    public AccommodationResponseDto updateAutoConfirm(UUID id, boolean autoConfirm) {
+        Accommodation accommodation = accommodationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Accommodation not found: " + id));
+
+        accommodation.setAutoConfirm(autoConfirm);
+        Accommodation saved = accommodationRepository.save(accommodation);
+        sendAccommodationUpdatedEvent(saved);
+
+        return accommodationMapper.toDto(saved);
+    }
+
+    @Transactional
+    public boolean getAutoConfirm(UUID id) {
+        Accommodation accommodation = accommodationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Accommodation not found: " + id));
+        return accommodation.getAutoConfirm();
+    }
+
+
 
     @Transactional
     public AccommodationResponseDto update(UUID id, AccommodationRequestDto request) {
@@ -104,12 +127,14 @@ public class AccommodationService {
 
 
         Accommodation saved = accommodationRepository.save(accommodation);
+        sendAccommodationUpdatedEvent(saved);
         return accommodationMapper.toDto(saved);
     }
 
 
     @Transactional
     public AccommodationResponseDto create(AccommodationRequestDto request) {
+
         Location location = Location.builder()
                 .country(request.getLocation().getCountry())
                 .city(request.getLocation().getCity())
@@ -163,8 +188,8 @@ public class AccommodationService {
                 saved.getAutoConfirm(),
                 saved.getPricingMode(),
                 new LocationDto(
-                        saved.getLocation().getCity(),
                         saved.getLocation().getCountry(),
+                        saved.getLocation().getCity(),
                         saved.getLocation().getAddress(),
                         saved.getLocation().getPostalCode()
                 ),
@@ -183,5 +208,41 @@ public class AccommodationService {
             throw new RuntimeException("Failed to serialize AccommodationEvent", e);
         }
     }
+
+    private void sendAccommodationUpdatedEvent(Accommodation updated) {
+        LocationDto locationDto = new LocationDto();
+        locationDto.setAddress(updated.getLocation().getAddress());
+        locationDto.setCity(updated.getLocation().getCity());
+        locationDto.setCountry(updated.getLocation().getCountry());
+        locationDto.setPostalCode(updated.getLocation().getPostalCode());
+
+        System.out.println("country: " + locationDto.getCountry());
+        AccommodationEvent event = new AccommodationEvent(
+                "AccommodationUpdated",
+                updated.getId().toString(),
+                updated.getHostId().toString(),
+                updated.getName(),
+                updated.getDescription(),
+                updated.getMinGuests(),
+                updated.getMaxGuests(),
+                updated.getAutoConfirm(),
+                updated.getPricingMode(),
+                locationDto,
+                updated.getAmenities().stream()
+                        .map(Amenity::getName)
+                        .collect(Collectors.toList()),
+                updated.getPhotos().stream()
+                        .map(Photo::getUrl)
+                        .collect(Collectors.toList())
+        );
+        try {
+            String json = objectMapper.writeValueAsString(event);
+            System.out.println(json);
+            kafkaTemplate.send("accommodation-events", updated.getId().toString(), json);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize AccommodationEvent", e);
+        }
+    }
+
 
 }
