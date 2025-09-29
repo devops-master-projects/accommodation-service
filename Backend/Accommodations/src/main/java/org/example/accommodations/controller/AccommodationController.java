@@ -1,5 +1,5 @@
 package org.example.accommodations.controller;
-
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.example.accommodations.dto.AccommodationRequestDto;
 import org.example.accommodations.dto.AccommodationResponseDto;
@@ -28,7 +28,7 @@ public class AccommodationController {
         return accommodationService.getAll();
     }
 
-
+    @PreAuthorize("hasRole('host')")
     @PostMapping
     public AccommodationResponseDto create(@RequestBody AccommodationRequestDto request) {
         return accommodationService.create(request);
@@ -38,7 +38,7 @@ public class AccommodationController {
     public ResponseEntity<AccommodationResponseDto> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(accommodationService.getById(id));
     }
-
+    @PreAuthorize("hasRole('host')")
     @PutMapping("/{id}")
     public ResponseEntity<AccommodationResponseDto> update(
             @PathVariable UUID id,
@@ -46,7 +46,7 @@ public class AccommodationController {
     ) {
         return ResponseEntity.ok(accommodationService.update(id, request));
     }
-
+    @PreAuthorize("hasRole('host')")
     @PatchMapping("/{id}/auto-confirm")
     public ResponseEntity<AccommodationResponseDto> updateAutoConfirm(
             @PathVariable UUID id,
@@ -56,6 +56,7 @@ public class AccommodationController {
         return ResponseEntity.ok(updated);
     }
 
+    @PreAuthorize("hasRole('host')")
     @GetMapping("/{id}/auto-confirm")
     public ResponseEntity<AutoConfirm> getAutoConfirm(@PathVariable UUID id) {
         boolean autoConfirm = accommodationService.getAutoConfirm(id);
