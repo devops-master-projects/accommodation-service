@@ -6,6 +6,7 @@ import org.example.accommodations.dto.AmenityResponseDto;
 import org.example.accommodations.mappers.AmenityMapper;
 import org.example.accommodations.service.AmenityService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
 public class AmenityController {
 
     private final AmenityService service;
-
+    @PreAuthorize("hasRole('host')")
     @PostMapping
     public ResponseEntity<AmenityResponseDto> create(@RequestBody AmenityRequestDto request) {
         AmenityResponseDto response = service.create(request);
