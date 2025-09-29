@@ -56,7 +56,7 @@ public class AccommodationController {
         return ResponseEntity.ok(updated);
     }
 
-    @PreAuthorize("hasRole('host')")
+    @PreAuthorize("hasAnyRole('host','guest')")
     @GetMapping("/{id}/auto-confirm")
     public ResponseEntity<AutoConfirm> getAutoConfirm(@PathVariable UUID id) {
         boolean autoConfirm = accommodationService.getAutoConfirm(id);
