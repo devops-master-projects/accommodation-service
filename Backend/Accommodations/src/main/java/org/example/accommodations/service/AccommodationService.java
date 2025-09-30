@@ -51,6 +51,13 @@ public class AccommodationService {
         return accommodationMapper.toDto(accommodation);
     }
 
+    public UUID getHostId(UUID accommodationId) {
+        Accommodation accommodation = accommodationRepository.findById(accommodationId)
+                .orElseThrow(() -> new IllegalArgumentException("Accommodation not found with id=" + accommodationId));
+        return accommodation.getHostId();
+    }
+
+
     public List<AccommodationResponseDto> getAll()  {
         return accommodationRepository.findAllWithDetails()
                 .stream()

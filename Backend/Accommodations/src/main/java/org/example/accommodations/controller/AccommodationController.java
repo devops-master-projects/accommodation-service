@@ -34,6 +34,14 @@ public class AccommodationController {
         return accommodationService.create(request);
     }
 
+    @PreAuthorize("permitAll()")
+    @GetMapping("/{id}/host")
+    public ResponseEntity<UUID> getHostId(@PathVariable UUID id) {
+        UUID hostId = accommodationService.getHostId(id);
+        return ResponseEntity.ok(hostId);
+    }
+
+
     @GetMapping("/{id}")
     public ResponseEntity<AccommodationResponseDto> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(accommodationService.getById(id));
