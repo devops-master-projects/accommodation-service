@@ -27,6 +27,12 @@ public class AccommodationController {
     public List<AccommodationResponseDto> getAll()  {
         return accommodationService.getAll();
     }
+    @PreAuthorize("permitAll()")
+    @GetMapping("/host/{hostId}")
+    public List<UUID> getAllByHost(@PathVariable UUID hostId) {
+        return accommodationService.getAllIdsByHost(hostId);
+    }
+
 
     @PreAuthorize("hasRole('host')")
     @PostMapping
@@ -40,7 +46,6 @@ public class AccommodationController {
         UUID hostId = accommodationService.getHostId(id);
         return ResponseEntity.ok(hostId);
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<AccommodationResponseDto> getById(@PathVariable UUID id) {
@@ -69,6 +74,13 @@ public class AccommodationController {
     public ResponseEntity<AutoConfirm> getAutoConfirm(@PathVariable UUID id) {
         boolean autoConfirm = accommodationService.getAutoConfirm(id);
         return ResponseEntity.ok(new AutoConfirm(autoConfirm));
+    }
+
+    @PreAuthorize("hasRole('host')")
+    @DeleteMapping
+    public ResponseEntity<Void> deleteAccommodations(@RequestBody List<UUID> ids) {
+        accommodationService.deleteAccommodationsByIds(ids);
+        return ResponseEntity.noContent().build();
     }
 
 }

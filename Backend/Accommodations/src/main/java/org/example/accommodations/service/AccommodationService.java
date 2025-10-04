@@ -67,6 +67,12 @@ public class AccommodationService {
                 .toList();
     }
 
+    public List<UUID> getAllIdsByHost(UUID hostId) {
+        return accommodationRepository.findAllIdsByHostId(hostId);
+    }
+
+
+
     @Transactional
     public AccommodationResponseDto updateAutoConfirm(UUID id, boolean autoConfirm) {
         Accommodation accommodation = accommodationRepository.findById(id)
@@ -253,5 +259,19 @@ public class AccommodationService {
         }
     }
 
+    /**
+     * Deletes all accommodations (and related entities) for the given IDs.
+     * Cascade rules on Accommodation ensure photos, availabilities,
+     * and amenities relations are also deleted.
+     *
+     * @param ids List of accommodation IDs to delete
+     */
+    @Transactional
+    public void deleteAccommodationsByIds(List<UUID> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        accommodationRepository.deleteAllByIdInBatch(ids);
+    }
 
 }
