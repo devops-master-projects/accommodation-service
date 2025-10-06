@@ -12,7 +12,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class AccommodationRequestDto {
-    private UUID hostId;
     private String name;
     private LocationDto location;
     private Integer minGuests;

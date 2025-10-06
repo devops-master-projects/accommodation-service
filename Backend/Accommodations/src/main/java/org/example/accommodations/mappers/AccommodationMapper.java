@@ -21,6 +21,7 @@ public class AccommodationMapper {
                 .maxGuests(accommodation.getMaxGuests())
                 .description(accommodation.getDescription())
                 .location(toLocationDto(accommodation.getLocation()))
+                .hostId(accommodation.getHostId())
                 .urlPhotos(accommodation.getPhotos() != null
                         ? accommodation.getPhotos().stream().map(Photo::getUrl).toList()
                         : null)

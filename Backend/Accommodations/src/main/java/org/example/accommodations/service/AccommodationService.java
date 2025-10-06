@@ -51,6 +51,15 @@ public class AccommodationService {
         return accommodationMapper.toDto(accommodation);
     }
 
+
+    public UUID getHostId(UUID accommodationId) {
+        Accommodation accommodation = accommodationRepository.findById(accommodationId)
+                .orElseThrow(() -> new IllegalArgumentException("Accommodation not found with id=" + accommodationId));
+        return accommodation.getHostId();
+    }
+
+
+
     public List<AccommodationResponseDto> getAll()  {
         return accommodationRepository.findAllWithDetails()
                 .stream()
@@ -58,11 +67,22 @@ public class AccommodationService {
                 .toList();
     }
 
+    public List<UUID> getAllIdsByHost(UUID hostId) {
+        return accommodationRepository.findAllIdsByHostId(hostId);
+    }
+
+
+
     @Transactional
-    public AccommodationResponseDto updateAutoConfirm(UUID id, boolean autoConfirm) {
+    public AccommodationResponseDto updateAutoConfirm(UUID id, boolean autoConfirm, UUID hostId) {
+
+
         Accommodation accommodation = accommodationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Accommodation not found: " + id));
 
+        if (!Objects.equals(hostId, accommodation.getHostId())) {
+            throw new SecurityException("You are not authorized to update this accommodation.");
+        }
         accommodation.setAutoConfirm(autoConfirm);
         Accommodation saved = accommodationRepository.save(accommodation);
         sendAccommodationUpdatedEvent(saved);
@@ -80,11 +100,14 @@ public class AccommodationService {
 
 
     @Transactional
-    public AccommodationResponseDto update(UUID id, AccommodationRequestDto request) {
+    public AccommodationResponseDto update(UUID id, AccommodationRequestDto request, UUID hostId) {
         Accommodation accommodation = accommodationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Accommodation not found: " + id));
 
-        // update basic fields
+        if (!Objects.equals(hostId, accommodation.getHostId())) {
+            throw new SecurityException("You are not authorized to update this accommodation.");
+        }
+        accommodation.setHostId(hostId);
         accommodation.setName(request.getName());
         accommodation.setMinGuests(request.getMinGuests());
         accommodation.setMaxGuests(request.getMaxGuests());
@@ -133,7 +156,7 @@ public class AccommodationService {
 
 
     @Transactional
-    public AccommodationResponseDto create(AccommodationRequestDto request) {
+    public AccommodationResponseDto create(AccommodationRequestDto request, UUID hostId) {
 
         Location location = Location.builder()
                 .country(request.getLocation().getCountry())
@@ -156,7 +179,7 @@ public class AccommodationService {
                 : new HashSet<>();
 
         Accommodation accommodation = Accommodation.builder()
-                .hostId(request.getHostId())
+                .hostId(hostId)
                 .name(request.getName())
                 .location(location)
                 .minGuests(request.getMinGuests())
@@ -203,6 +226,7 @@ public class AccommodationService {
 
         try {
             String json = objectMapper.writeValueAsString(event);
+            System.out.println("SALJEM!!!");
             kafkaTemplate.send("accommodation-events", saved.getId().toString(), json);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to serialize AccommodationEvent", e);
@@ -244,5 +268,19 @@ public class AccommodationService {
         }
     }
 
+    /**
+     * Deletes all accommodations (and related entities) for the given IDs.
+     * Cascade rules on Accommodation ensure photos, availabilities,
+     * and amenities relations are also deleted.
+     *
+     * @param ids List of accommodation IDs to delete
+     */
+    @Transactional
+    public void deleteAccommodationsByIds(List<UUID> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        accommodationRepository.deleteAllByIdInBatch(ids);
+    }
 
 }

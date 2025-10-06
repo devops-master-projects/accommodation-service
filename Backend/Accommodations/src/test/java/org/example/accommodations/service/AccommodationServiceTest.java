@@ -80,7 +80,6 @@ class AccommodationServiceTest {
 
     private AccommodationRequestDto makeRequestDto(Collection<UUID> amenityIds) {
         AccommodationRequestDto dto = new AccommodationRequestDto();
-        dto.setHostId(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
         dto.setName("Cozy Loft");
         dto.setDescription("Updated desc");
         dto.setMinGuests(2);
@@ -174,7 +173,7 @@ class AccommodationServiceTest {
         AccommodationResponseDto dto = new AccommodationResponseDto();
         given(accommodationMapper.toDto(a)).willReturn(dto);
 
-        AccommodationResponseDto res = accommodationService.updateAutoConfirm(id, true);
+        AccommodationResponseDto res = accommodationService.updateAutoConfirm(id, true, UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
 
         assertThat(a.getAutoConfirm()).isTrue();
         assertThat(res).isSameAs(dto);
@@ -194,7 +193,7 @@ class AccommodationServiceTest {
         UUID id = UUID.randomUUID();
         given(accommodationRepository.findById(id)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> accommodationService.updateAutoConfirm(id, true))
+        assertThatThrownBy(() -> accommodationService.updateAutoConfirm(id, true, UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining(id.toString());
 
@@ -248,7 +247,7 @@ class AccommodationServiceTest {
 
         AccommodationRequestDto req = makeRequestDto(Set.of(amenity1, amenity2));
 
-        AccommodationResponseDto out = accommodationService.update(id, req);
+        AccommodationResponseDto out = accommodationService.update(id, req, UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
 
         assertThat(out).isSameAs(dto);
         // ... (ostale asercije ostaju iste)
@@ -278,7 +277,7 @@ class AccommodationServiceTest {
 
         AccommodationRequestDto req = makeRequestDto(Set.of(amenity1, amenity2));
 
-        AccommodationResponseDto out = accommodationService.update(id, req);
+        AccommodationResponseDto out = accommodationService.update(id, req, UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
 
         assertThat(out).isNotNull();
         assertThat(a.getAmenities().stream().map(Amenity::getId)).containsExactly(amenity1);
@@ -297,7 +296,7 @@ class AccommodationServiceTest {
         AccommodationRequestDto req = makeRequestDto(Set.of()); // start from base
         req.setPhotos(null); // simulate null photos
 
-        accommodationService.update(id, req);
+        accommodationService.update(id, req, UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
 
         assertThat(a.getPhotos()).isEmpty(); // should be cleared
     }
@@ -314,7 +313,7 @@ class AccommodationServiceTest {
 
         AccommodationRequestDto req = makeRequestDto(null); // amenities null
 
-        accommodationService.update(id, req);
+        accommodationService.update(id, req, UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
 
         assertThat(a.getAmenities()).isEmpty();
         verifyNoInteractions(amenityRepository);
@@ -332,7 +331,7 @@ class AccommodationServiceTest {
 
         AccommodationRequestDto req = makeRequestDto(Set.of());
 
-        accommodationService.update(id, req);
+        accommodationService.update(id, req, UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
 
         assertThat(a.getLocation()).isNotNull();
         assertThat(a.getLocation().getCity()).isEqualTo("Beograd");
@@ -345,7 +344,7 @@ class AccommodationServiceTest {
 
         AccommodationRequestDto req = makeRequestDto(Set.of());
 
-        assertThatThrownBy(() -> accommodationService.update(id, req))
+        assertThatThrownBy(() -> accommodationService.update(id, req, UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining(id.toString());
 
@@ -369,7 +368,7 @@ class AccommodationServiceTest {
         // Ne stubujemo mapper.toDto(...) — exception se dešava pre mapiranja
         AccommodationRequestDto req = makeRequestDto(Set.of());
 
-        assertThatThrownBy(() -> failingService.update(id, req))
+        assertThatThrownBy(() -> failingService.update(id, req, UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Failed to serialize AccommodationEvent");
 
@@ -402,7 +401,7 @@ class AccommodationServiceTest {
         AccommodationResponseDto dto = new AccommodationResponseDto();
         given(accommodationMapper.toDto(any(Accommodation.class))).willReturn(dto);
 
-        AccommodationResponseDto out = accommodationService.create(makeRequestDto(Set.of(amenity1, amenity2)));
+        AccommodationResponseDto out = accommodationService.create(makeRequestDto(Set.of(amenity1, amenity2)), UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
 
         assertThat(out).isSameAs(dto);
         Accommodation persisted = saved.value;
@@ -422,7 +421,7 @@ class AccommodationServiceTest {
         ));
         given(amenityRepository.findById(any(UUID.class))).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> accommodationService.create(req))
+        assertThatThrownBy(() -> accommodationService.create(req, UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Amenity not found");
 
@@ -447,7 +446,7 @@ class AccommodationServiceTest {
         AccommodationRequestDto req = makeRequestDto(Set.of(am));
         req.setPhotos(null); // null photos
 
-        accommodationService.create(req);
+        accommodationService.create(req, UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
 
         assertThat(saved.value.getPhotos()).isEmpty();
         verify(kafkaTemplate).send(eq("accommodation-events"), anyString(), anyString());
@@ -466,7 +465,7 @@ class AccommodationServiceTest {
 
         AccommodationRequestDto req = makeRequestDto(null); // amenities null
 
-        accommodationService.create(req);
+        accommodationService.create(req, UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
 
         assertThat(saved.value.getAmenities()).isEmpty();
         verifyNoInteractions(amenityRepository);
@@ -491,7 +490,7 @@ class AccommodationServiceTest {
 
         AccommodationRequestDto req = makeRequestDto(Set.of(am));
 
-        assertThatThrownBy(() -> failingService.create(req))
+        assertThatThrownBy(() -> failingService.create(req, UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Failed to serialize AccommodationEvent");
 

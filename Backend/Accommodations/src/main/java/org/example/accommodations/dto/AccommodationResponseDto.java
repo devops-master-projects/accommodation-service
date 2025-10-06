@@ -13,6 +13,7 @@ import java.util.UUID;
 @Builder
 public class AccommodationResponseDto {
     private UUID id;
+    private UUID hostId;
     private String name;
     private Integer minGuests;
     private Integer maxGuests;
