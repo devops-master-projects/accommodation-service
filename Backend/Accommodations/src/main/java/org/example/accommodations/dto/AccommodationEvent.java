@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @Getter
 @Setter
+@Builder
 public class AccommodationEvent {
     private String eventType;
     private String id;
