@@ -51,6 +51,7 @@ class AccommodationServiceIntegrationTest {
     private Amenity wifi;
     private Amenity parking;
 
+
     @BeforeEach
     void setup() {
         hostId = UUID.randomUUID();
@@ -60,7 +61,6 @@ class AccommodationServiceIntegrationTest {
 
     private AccommodationRequestDto newCreateDto(List<UUID> amenityIds) {
         return AccommodationRequestDto.builder()
-                .hostId(hostId)
                 .name("Seaside Apartment")
                 .description("Nice view, close to beach")
                 .minGuests(1)
@@ -86,7 +86,7 @@ class AccommodationServiceIntegrationTest {
     void testCreate() throws Exception {
         AccommodationRequestDto dto = newCreateDto(List.of(wifi.getId(), parking.getId()));
 
-        AccommodationResponseDto created = service.create(dto);
+        AccommodationResponseDto created = service.create(dto, UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
 
         assertThat(created.getId()).isNotNull();
         assertThat(created.getName()).isEqualTo("Seaside Apartment");
@@ -106,7 +106,7 @@ class AccommodationServiceIntegrationTest {
         assertThat(keyCap.getValue()).isEqualTo(created.getId().toString());
 
         AccommodationEvent event = objectMapper.readValue(valueCap.getValue(), AccommodationEvent.class);
-        assertThat(event.getHostId()).isEqualTo(hostId.toString());
+        assertThat(event.getHostId()).isEqualTo("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
         assertThat(event.getName()).isEqualTo("Seaside Apartment");
         assertThat(event.getAmenities()).containsExactlyInAnyOrder("WiFi", "Parking");
         assertThat(event.getLocation().getCountry()).isEqualTo("RS");
@@ -115,7 +115,7 @@ class AccommodationServiceIntegrationTest {
     @Test
     @DisplayName("getById(): returns DTO with details")
     void testGetById() {
-        AccommodationResponseDto created = service.create(newCreateDto(List.of(wifi.getId())));
+        AccommodationResponseDto created = service.create(newCreateDto(List.of(wifi.getId())), UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
 
         AccommodationResponseDto found = service.getById(created.getId());
         assertThat(found.getId()).isEqualTo(created.getId());
@@ -128,8 +128,8 @@ class AccommodationServiceIntegrationTest {
     @Test
     @DisplayName("getAll(): returns all items")
     void testGetAll() {
-        service.create(newCreateDto(List.of(wifi.getId())));
-        service.create(newCreateDto(List.of(parking.getId())));
+        service.create(newCreateDto(List.of(wifi.getId())),hostId);
+        service.create(newCreateDto(List.of(parking.getId())),hostId);
         List<AccommodationResponseDto> all = service.getAll();
         assertThat(all).hasSize(2);
     }
@@ -137,11 +137,10 @@ class AccommodationServiceIntegrationTest {
     @Test
     @DisplayName("update(): updates fields, replaces photos & amenities and publishes AccommodationUpdated event")
     void testUpdate() throws Exception {
-        AccommodationResponseDto created = service.create(newCreateDto(List.of(wifi.getId())));
+        AccommodationResponseDto created = service.create(newCreateDto(List.of(wifi.getId())), hostId);
         UUID id = created.getId();
 
         AccommodationRequestDto update = AccommodationRequestDto.builder()
-                .hostId(hostId)
                 .name("Renovated Loft")
                 .description("Freshly renovated")
                 .minGuests(2)
@@ -158,7 +157,7 @@ class AccommodationServiceIntegrationTest {
                 .amenities(List.of(parking.getId()))
                 .build();
 
-        AccommodationResponseDto updated = service.update(id, update);
+        AccommodationResponseDto updated = service.update(id, update,hostId);
 
         assertThat(updated.getName()).isEqualTo("Renovated Loft");
         assertThat(updated.getDescription()).isEqualTo("Freshly renovated");
@@ -186,10 +185,10 @@ class AccommodationServiceIntegrationTest {
     @Test
     @DisplayName("updateAutoConfirm(): flips flag and publishes AccommodationUpdated event")
     void testUpdateAutoConfirm() throws Exception {
-        AccommodationResponseDto created = service.create(newCreateDto(List.of()));
+        AccommodationResponseDto created = service.create(newCreateDto(List.of()),hostId);
         UUID id = created.getId();
 
-        AccommodationResponseDto after = service.updateAutoConfirm(id, true);
+        AccommodationResponseDto after = service.updateAutoConfirm(id, true, hostId);
         assertThat(after.getAutoConfirm()).isTrue();
 
         ArgumentCaptor<String> valueCap = ArgumentCaptor.forClass(String.class);
@@ -207,11 +206,11 @@ class AccommodationServiceIntegrationTest {
     @Test
     @DisplayName("getAutoConfirm(): returns current value")
     void testGetAutoConfirm() {
-        AccommodationResponseDto created = service.create(newCreateDto(List.of()));
+        AccommodationResponseDto created = service.create(newCreateDto(List.of()), hostId);
         UUID id = created.getId();
         assertThat(service.getAutoConfirm(id)).isFalse();
 
-        service.updateAutoConfirm(id, true);
+        service.updateAutoConfirm(id, true,hostId);
         assertThat(service.getAutoConfirm(id)).isTrue();
     }
 
@@ -235,7 +234,6 @@ class AccommodationServiceIntegrationTest {
         UUID randomId = UUID.randomUUID();
 
         AccommodationRequestDto update = AccommodationRequestDto.builder()
-                .hostId(hostId)
                 .name("Name")
                 .description("Desc")
                 .minGuests(1)
@@ -248,14 +246,14 @@ class AccommodationServiceIntegrationTest {
                 .amenities(List.of(parking.getId()))
                 .build();
 
-        Assertions.assertThrows(EntityNotFoundException.class, () -> service.update(randomId, update));
+        Assertions.assertThrows(EntityNotFoundException.class, () -> service.update(randomId, update,hostId));
     }
 
     @Test
     @DisplayName("updateAutoConfirm(): throws EntityNotFoundException when accommodation does not exist")
     void testUpdateAutoConfirmNotFound() {
         UUID randomId = UUID.randomUUID();
-        Assertions.assertThrows(EntityNotFoundException.class, () -> service.updateAutoConfirm(randomId, true));
+        Assertions.assertThrows(EntityNotFoundException.class, () -> service.updateAutoConfirm(randomId, true,hostId));
     }
 
     @Test
@@ -263,18 +261,17 @@ class AccommodationServiceIntegrationTest {
     void testCreateWithMissingAmenityThrows() {
         UUID notExistingAmenityId = UUID.randomUUID(); // not in repo
         AccommodationRequestDto dto = newCreateDto(List.of(wifi.getId(), notExistingAmenityId));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> service.create(dto));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> service.create(dto, hostId));
     }
 
     @Test
     @DisplayName("update(): ignores non-existing amenity IDs and keeps only existing ones")
     void testUpdateIgnoresMissingAmenityIds() {
-        AccommodationResponseDto created = service.create(newCreateDto(List.of(wifi.getId())));
+        AccommodationResponseDto created = service.create(newCreateDto(List.of(wifi.getId())), hostId);
         UUID id = created.getId();
 
         UUID missing = UUID.randomUUID();
         AccommodationRequestDto update = AccommodationRequestDto.builder()
-                .hostId(hostId)
                 .name("Same Name")
                 .description("Same Desc")
                 .minGuests(1)
@@ -287,7 +284,7 @@ class AccommodationServiceIntegrationTest {
                 .amenities(List.of(parking.getId(), missing))
                 .build();
 
-        AccommodationResponseDto updated = service.update(id, update);
+        AccommodationResponseDto updated = service.update(id, update,hostId);
 
         assertThat(updated.getAmenities())
                 .extracting(AmenityResponseDto::getName)
@@ -297,12 +294,11 @@ class AccommodationServiceIntegrationTest {
     @Test
     @DisplayName("update(): fully replaces photos (previous photos are cleared)")
     void testUpdateReplacesPhotosCompletely() {
-        AccommodationResponseDto created = service.create(newCreateDto(List.of(wifi.getId())));
+        AccommodationResponseDto created = service.create(newCreateDto(List.of(wifi.getId())),hostId);
         UUID id = created.getId();
         assertThat(created.getUrlPhotos()).containsExactlyInAnyOrder("https://img/1.jpg", "https://img/2.jpg");
 
         AccommodationRequestDto update = AccommodationRequestDto.builder()
-                .hostId(hostId)
                 .name(created.getName())
                 .description(created.getDescription())
                 .minGuests(created.getMinGuests())
@@ -314,14 +310,14 @@ class AccommodationServiceIntegrationTest {
                 .amenities(List.of(wifi.getId()))
                 .build();
 
-        AccommodationResponseDto after = service.update(id, update);
+        AccommodationResponseDto after = service.update(id, update, hostId);
         assertThat(after.getUrlPhotos()).containsExactly("https://img/new.jpg");
     }
 
     @Test
     @DisplayName("Kafka: topic is 'accommodation-events' and key equals accommodationId for create and update")
     void testKafkaTopicAndKey() throws Exception {
-        AccommodationResponseDto created = service.create(newCreateDto(List.of(wifi.getId())));
+        AccommodationResponseDto created = service.create(newCreateDto(List.of(wifi.getId())),hostId);
 
         ArgumentCaptor<String> topicCap = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> keyCap = ArgumentCaptor.forClass(String.class);
@@ -332,7 +328,6 @@ class AccommodationServiceIntegrationTest {
         assertThat(keyCap.getAllValues().get(0)).isEqualTo(created.getId().toString());
 
         AccommodationRequestDto update = AccommodationRequestDto.builder()
-                .hostId(hostId)
                 .name("Changed Name")
                 .description(created.getDescription())
                 .minGuests(created.getMinGuests())
@@ -344,7 +339,7 @@ class AccommodationServiceIntegrationTest {
                 .amenities(List.of(wifi.getId()))
                 .build();
 
-        service.update(created.getId(), update);
+        service.update(created.getId(), update, hostId);
 
         verify(kafkaTemplate, atLeast(2)).send(topicCap.capture(), keyCap.capture(), valueCap.capture());
         String lastTopic = topicCap.getAllValues().get(topicCap.getAllValues().size() - 1);
@@ -356,10 +351,10 @@ class AccommodationServiceIntegrationTest {
     @Test
     @DisplayName("updateAutoConfirm(): toggling flag keeps name, location and photos unchanged")
     void testUpdateAutoConfirmKeepsOtherFields() {
-        AccommodationResponseDto created = service.create(newCreateDto(List.of(wifi.getId())));
+        AccommodationResponseDto created = service.create(newCreateDto(List.of(wifi.getId())),hostId);
         UUID id = created.getId();
 
-        AccommodationResponseDto after = service.updateAutoConfirm(id, true);
+        AccommodationResponseDto after = service.updateAutoConfirm(id, true, hostId);
         assertThat(after.getAutoConfirm()).isTrue();
 
         AccommodationResponseDto reloaded = service.getById(id);
@@ -371,7 +366,7 @@ class AccommodationServiceIntegrationTest {
     @Test
     @DisplayName("create(): pricingMode is a string and preserved in response")
     void testCreatePricingModeStringPreserved() {
-        AccommodationResponseDto created = service.create(newCreateDto(List.of()));
+        AccommodationResponseDto created = service.create(newCreateDto(List.of()), hostId);
         assertThat(created.getPricingMode()).isEqualTo("PER_NIGHT");
     }
 }

@@ -74,10 +74,15 @@ public class AccommodationService {
 
 
     @Transactional
-    public AccommodationResponseDto updateAutoConfirm(UUID id, boolean autoConfirm) {
+    public AccommodationResponseDto updateAutoConfirm(UUID id, boolean autoConfirm, UUID hostId) {
+
+
         Accommodation accommodation = accommodationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Accommodation not found: " + id));
 
+        if (!Objects.equals(hostId, accommodation.getHostId())) {
+            throw new SecurityException("You are not authorized to update this accommodation.");
+        }
         accommodation.setAutoConfirm(autoConfirm);
         Accommodation saved = accommodationRepository.save(accommodation);
         sendAccommodationUpdatedEvent(saved);
@@ -95,11 +100,14 @@ public class AccommodationService {
 
 
     @Transactional
-    public AccommodationResponseDto update(UUID id, AccommodationRequestDto request) {
+    public AccommodationResponseDto update(UUID id, AccommodationRequestDto request, UUID hostId) {
         Accommodation accommodation = accommodationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Accommodation not found: " + id));
 
-        // update basic fields
+        if (!Objects.equals(hostId, accommodation.getHostId())) {
+            throw new SecurityException("You are not authorized to update this accommodation.");
+        }
+        accommodation.setHostId(hostId);
         accommodation.setName(request.getName());
         accommodation.setMinGuests(request.getMinGuests());
         accommodation.setMaxGuests(request.getMaxGuests());
@@ -148,7 +156,7 @@ public class AccommodationService {
 
 
     @Transactional
-    public AccommodationResponseDto create(AccommodationRequestDto request) {
+    public AccommodationResponseDto create(AccommodationRequestDto request, UUID hostId) {
 
         Location location = Location.builder()
                 .country(request.getLocation().getCountry())
@@ -171,7 +179,7 @@ public class AccommodationService {
                 : new HashSet<>();
 
         Accommodation accommodation = Accommodation.builder()
-                .hostId(request.getHostId())
+                .hostId(hostId)
                 .name(request.getName())
                 .location(location)
                 .minGuests(request.getMinGuests())
@@ -218,6 +226,7 @@ public class AccommodationService {
 
         try {
             String json = objectMapper.writeValueAsString(event);
+            System.out.println("SALJEM!!!");
             kafkaTemplate.send("accommodation-events", saved.getId().toString(), json);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to serialize AccommodationEvent", e);

@@ -7,6 +7,8 @@ import org.example.accommodations.dto.AutoConfirm;
 import org.example.accommodations.model.Accommodation;
 import org.example.accommodations.service.AccommodationService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -36,17 +38,28 @@ public class AccommodationController {
 
     @PreAuthorize("hasRole('host')")
     @PostMapping
-    public AccommodationResponseDto create(@RequestBody AccommodationRequestDto request) {
-        return accommodationService.create(request);
+    public AccommodationResponseDto create(@RequestBody AccommodationRequestDto request, @AuthenticationPrincipal Jwt jwt) {
+        UUID hostId = UUID.fromString(jwt.getClaim("sub"));
+        return accommodationService.create(request, hostId);
     }
+
+    @GetMapping("/{accommodationId}/host")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<HostInfoResponse> getHostInfo(@PathVariable UUID accommodationId) {
+        AccommodationResponseDto acc = accommodationService.getById(accommodationId);
+
+        HostInfoResponse dto = new HostInfoResponse(
+                acc.getHostId(),
+                acc.getName()
+        );
+
+        return ResponseEntity.ok(dto);
+    }
+
+    public record HostInfoResponse(UUID hostId, String accommodationName) {}
+
 
     @PreAuthorize("permitAll()")
-    @GetMapping("/{id}/host")
-    public ResponseEntity<UUID> getHostId(@PathVariable UUID id) {
-        UUID hostId = accommodationService.getHostId(id);
-        return ResponseEntity.ok(hostId);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<AccommodationResponseDto> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(accommodationService.getById(id));
@@ -55,17 +68,21 @@ public class AccommodationController {
     @PutMapping("/{id}")
     public ResponseEntity<AccommodationResponseDto> update(
             @PathVariable UUID id,
-            @RequestBody AccommodationRequestDto request
+            @RequestBody AccommodationRequestDto request,
+            @AuthenticationPrincipal Jwt jwt
     ) {
-        return ResponseEntity.ok(accommodationService.update(id, request));
+        UUID hostId = UUID.fromString(jwt.getClaim("sub"));
+        return ResponseEntity.ok(accommodationService.update(id, request, hostId));
     }
     @PreAuthorize("hasRole('host')")
     @PatchMapping("/{id}/auto-confirm")
     public ResponseEntity<AccommodationResponseDto> updateAutoConfirm(
             @PathVariable UUID id,
-            @RequestBody AutoConfirm request) {
+            @RequestBody AutoConfirm request,
+            @AuthenticationPrincipal Jwt jwt) {
+        UUID hostId = UUID.fromString(jwt.getClaim("sub"));
 
-        AccommodationResponseDto updated = accommodationService.updateAutoConfirm(id, request.isAutoConfirm());
+        AccommodationResponseDto updated = accommodationService.updateAutoConfirm(id, request.isAutoConfirm(), hostId);
         return ResponseEntity.ok(updated);
     }
 
