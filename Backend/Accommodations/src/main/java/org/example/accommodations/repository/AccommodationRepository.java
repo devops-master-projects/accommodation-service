@@ -1,6 +1,7 @@
 package org.example.accommodations.repository;
 
 
+import jakarta.transaction.Transactional;
 import org.example.accommodations.model.Accommodation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,5 +28,10 @@ public interface AccommodationRepository extends JpaRepository<Accommodation, UU
             "LEFT JOIN FETCH a.amenities")
     List<Accommodation> findAllWithDetails();
 
+    @Query("SELECT a.id FROM Accommodation a WHERE a.hostId = :hostId")
+    List<UUID> findAllIdsByHostId(@Param("hostId") UUID hostId);
+
+    @Transactional
+    void deleteAllByIdInBatch(Iterable<UUID> ids);
 
 }

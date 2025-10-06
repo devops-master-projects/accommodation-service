@@ -51,7 +51,8 @@ class AmenityControllerTest {
     @Test
     @DisplayName("GET /api/amenities returns 200 and empty list when no amenities exist")
     void getAll_empty_ok() throws Exception {
-        mockMvc.perform(get("/api/amenities"))
+        mockMvc.perform(get("/api/amenities")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_host")))) // ← dodato
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
@@ -108,11 +109,13 @@ class AmenityControllerTest {
                         .content(objectMapper.writeValueAsString(req("Parking", "On-site"))))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/amenities"))
+        mockMvc.perform(get("/api/amenities")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_host")))) // ← dodato
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Parking"))
                 .andExpect(jsonPath("$[0].description").value("On-site"));
     }
+
 
     @Test
     @DisplayName("POST /api/amenities allows null description (host) and returns 200")
