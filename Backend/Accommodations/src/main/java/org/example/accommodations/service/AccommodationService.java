@@ -283,6 +283,7 @@ public class AccommodationService {
         accommodationRepository.deleteAllByIdInBatch(ids);
     }
 
+
     @Transactional
     public void deleteAllAccommodations(UUID hostId) {
         List<Accommodation> toDelete = accommodationRepository.findAllByHostId(hostId);
@@ -312,5 +313,6 @@ public class AccommodationService {
             throw new RuntimeException("Failed to serialize AccommodationsDeleted event", e);
         }
     }
+
 
 }

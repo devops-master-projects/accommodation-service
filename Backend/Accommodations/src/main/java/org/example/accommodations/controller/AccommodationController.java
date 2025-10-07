@@ -100,6 +100,7 @@ public class AccommodationController {
         return ResponseEntity.noContent().build();
     }
 
+
     @PreAuthorize("hasRole('host')")
     @DeleteMapping("/host/all")
     public ResponseEntity<Void> deleteAllAccommodations(@AuthenticationPrincipal Jwt jwt) {
@@ -107,5 +108,6 @@ public class AccommodationController {
         accommodationService.deleteAllAccommodations(hostId);
         return ResponseEntity.noContent().build();
     }
+
 
 }
