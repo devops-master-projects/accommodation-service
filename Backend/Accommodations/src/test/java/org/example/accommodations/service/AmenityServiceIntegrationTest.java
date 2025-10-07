@@ -4,6 +4,7 @@ import org.example.accommodations.dto.AmenityRequestDto;
 import org.example.accommodations.dto.AmenityResponseDto;
 import org.example.accommodations.model.Amenity;
 import org.example.accommodations.repository.AmenityRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,14 +26,37 @@ import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Transactional
+@Testcontainers
 class AmenityServiceIntegrationTest {
+
+    @Container
+    static final PostgreSQLContainer<?> postgres =
+            new PostgreSQLContainer<>("postgres:15-alpine")
+                    .withDatabaseName("accommodations_test")
+                    .withUsername("test")
+                    .withPassword("test");
+
+    @DynamicPropertySource
+    static void configureDataSource(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+        registry.add("spring.jpa.show-sql", () -> "false");
+    }
+
 
     @Autowired
     private AmenityService service;
 
     @Autowired
     private AmenityRepository repository;
+
+    @BeforeEach
+    void cleanDatabase() {
+        repository.deleteAll();
+    }
 
     @Test
     @DisplayName("create(): persists amenity, generates ID and returns mapped DTO")
@@ -78,18 +107,17 @@ class AmenityServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("create(): fails at flush when name is null (DB not-null constraint)")
+    @DisplayName("create(): fails immediately when name is null (DB not-null constraint)")
     void create_nullName_failsOnFlush() {
         AmenityRequestDto req = AmenityRequestDto.builder()
                 .name(null)
                 .description("desc")
                 .build();
 
-        service.create(req);
-        assertThatThrownBy(() -> {
-            repository.flush();
-        }).isInstanceOf(DataIntegrityViolationException.class);
+        assertThatThrownBy(() -> service.create(req))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
+
 
     @Test
     @DisplayName("create(): description is optional (can be null)")

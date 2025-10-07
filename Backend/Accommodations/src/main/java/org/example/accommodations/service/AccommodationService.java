@@ -283,4 +283,36 @@ public class AccommodationService {
         accommodationRepository.deleteAllByIdInBatch(ids);
     }
 
+
+    @Transactional
+    public void deleteAllAccommodations(UUID hostId) {
+        List<Accommodation> toDelete = accommodationRepository.findAllByHostId(hostId);
+
+        if (toDelete.isEmpty()) {
+            System.out.println("No accommodations found for hostId=" + hostId);
+            return;
+        }
+
+        List<UUID> ids = toDelete.stream()
+                .map(Accommodation::getId)
+                .toList();
+
+        accommodationRepository.deleteAll(toDelete);
+        System.out.println("Deleted " + ids.size() + " accommodations from DB for hostId=" + hostId);
+
+        Map<String, Object> event = Map.of(
+                "eventType", "AccommodationsDeleted",
+                "accommodationIds", ids
+        );
+
+        try {
+            String json = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send("accommodation-deleted-events", json);
+            System.out.println("Published AccommodationsDeleted event to Kafka topic [accommodation-deleted-events]");
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize AccommodationsDeleted event", e);
+        }
+    }
+
+
 }
