@@ -34,4 +34,7 @@ public interface AccommodationRepository extends JpaRepository<Accommodation, UU
     @Transactional
     void deleteAllByIdInBatch(Iterable<UUID> ids);
 
+    List<Accommodation> findAllByHostId(UUID hostId);
+
+
 }
