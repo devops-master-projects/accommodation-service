@@ -100,4 +100,12 @@ public class AccommodationController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('host')")
+    @DeleteMapping("/host/all")
+    public ResponseEntity<Void> deleteAllAccommodations(@AuthenticationPrincipal Jwt jwt) {
+        UUID hostId = UUID.fromString(jwt.getClaim("sub"));
+        accommodationService.deleteAllAccommodations(hostId);
+        return ResponseEntity.noContent().build();
+    }
+
 }
