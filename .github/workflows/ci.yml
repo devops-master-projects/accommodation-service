@@ -24,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Važno za SonarCloud
+          fetch-depth: 0  # Potrebno za SonarCloud
 
       - name: Set up JDK 17 (Temurin)
         uses: actions/setup-java@v4
@@ -33,13 +33,20 @@ jobs:
           java-version: '17'
           cache: gradle
 
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
       - name: Grant execute permission for Gradle wrapper
         run: chmod +x ./gradlew
 
-      - name: Build & run unit + integration tests
-        run: ./gradlew clean build --no-daemon
+      - name: Build & run tests with coverage
+        run: ./gradlew clean build jacocoTestReport --no-daemon
 
-      - name: Run SonarCloud Analysis
+      - name: SonarCloud Scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -51,9 +58,9 @@ jobs:
         with:
           name: test-reports
           path: |
-            **/build/test-results/**
-            **/build/reports/tests/**
-            **/build/reports/jacoco/**
+            Backend/Accommodations/build/test-results/**
+            Backend/Accommodations/build/reports/tests/**
+            Backend/Accommodations/build/reports/jacoco/**
 
   kaniko:
     if: github.event_name == 'push'
