@@ -24,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Važno za SonarCloud
 
       - name: Set up JDK 17 (Temurin)
         uses: actions/setup-java@v4
@@ -39,6 +39,12 @@ jobs:
       - name: Build & run unit + integration tests
         run: ./gradlew clean build --no-daemon
 
+      - name: Run SonarCloud Analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew sonar --no-daemon
+
       - name: Upload test reports (always)
         if: always()
         uses: actions/upload-artifact@v4
@@ -47,6 +53,7 @@ jobs:
           path: |
             **/build/test-results/**
             **/build/reports/tests/**
+            **/build/reports/jacoco/**
 
   kaniko:
     if: github.event_name == 'push'
@@ -83,7 +90,6 @@ jobs:
           PV="${{ steps.v.outputs.pkgver }}"
           SH="${{ steps.v.outputs.sha }}"
           
-          # Fix: Use default version if empty
           if [ -z "$PV" ] || [ "$PV" = "unspecified" ]; then
             PV="0.0.1-SNAPSHOT"
           fi
